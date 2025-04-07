@@ -1,0 +1,30 @@
+{
+  "name": "getdollarbcv",
+  "version": "1.0.0",
+  "description": "Api para obtener el precio del dolar BCV",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js",
+    "dev": "nodemon index.js"
+  },
+  "dependencies": {
+    "axios": "^1.5.1",
+    "cheerio": "^1.0.0-rc.12",
+    "express": "^4.18.2"
+  },
+  "devDependencies": {
+    "nodemon": "^3.0.2"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Anthonyzok521/get-dollar-bcv.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/Anthonyzok521/get-dollar-bcv/issues"
+  },
+  "homepage": "https://github.com/Anthonyzok521/get-dollar-bcv#readme"
+}
