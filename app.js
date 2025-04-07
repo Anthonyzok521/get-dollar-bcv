@@ -2,6 +2,7 @@ const express = require('express');
 const axios = require('axios');
 const cheerio = require('cheerio');
 const https = require('https');
+const momentTZ = require('moment-timezone');
 
 const app = express();
 const PORT = process.env.PORT || 3100;
@@ -10,6 +11,18 @@ const PORT = process.env.PORT || 3100;
 const agent = new https.Agent({  
   rejectUnauthorized: false
 });
+
+const dateFormateWithTZ = (date) => {
+  try{
+      const dateFormatTz = momentTZ.tz(date, 'YYYY-MM-DD HH:mm:ss', 'America/Caracas').format('DD-MM-YYYY hh:mm A');
+      if(dateFormatTz.includes('Invalid date')){
+          throw new Error(null);
+      }
+      return dateFormatTz;
+  }catch(e){
+      return null;
+  }
+}
 
 // Middleware para permitir CORS
 app.use((req, res, next) => {
@@ -50,7 +63,7 @@ async function obtenerTasaDolarBCV() {
 
     return {
       tasa: tasa,
-      fecha: new Date().toISOString(),
+      fecha: dateFormateWithTZ(new Date()),
       moneda: 'USD',
       unidad: 'VES',
       fuente: 'BCV'
