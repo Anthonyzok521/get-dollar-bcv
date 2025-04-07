@@ -1,10 +1,21 @@
+const express = require('express');
 const axios = require('axios');
 const cheerio = require('cheerio');
 const https = require('https');
 
+const app = express();
+const PORT = process.env.PORT || 3100;
+
 // Configuración para ignorar errores de certificado SSL (solo desarrollo)
-const agent = new https.Agent({
+const agent = new https.Agent({  
   rejectUnauthorized: false
+});
+
+// Middleware para permitir CORS
+app.use((req, res, next) => {
+  res.header('Access-Control-Allow-Origin', '*');
+  res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept');
+  next();
 });
 
 // Función para obtener la tasa del BCV
@@ -50,7 +61,8 @@ async function obtenerTasaDolarBCV() {
   }
 }
 
-module.exports = async (req, res) => {
+// Endpoint principal
+app.get('/api/tasa', async (req, res) => {
   try {
     const data = await obtenerTasaDolarBCV();
     res.json({
@@ -63,4 +75,25 @@ module.exports = async (req, res) => {
       error: error.message
     });
   }
-};
+});
+
+// Endpoint de prueba
+app.get('/', (req, res) => {
+  res.send('API de Tasa del Dólar BCV - Use /api/tasa');
+});
+
+// Manejo de errores
+app.use((err, req, res, next) => {
+  console.error(err.stack);
+  res.status(500).json({
+    success: false,
+    error: 'Error interno del servidor'
+  });
+});
+
+// Iniciar servidor
+app.listen(PORT, () => {
+  console.log(`Servidor corriendo en http://localhost:${PORT}`);
+});
+
+module.exports = app;
