@@ -1,0 +1,125 @@
+# Get Dollar BCV
+
+API para obtener el precio del dólar oficial del Banco Central de Venezuela (BCV).
+
+## Descripción
+
+Este proyecto utiliza `axios` y `cheerio` para realizar scraping de la página oficial del BCV y extraer la tasa de cambio oficial del dólar. Está diseñado para ser desplegado en [Vercel](https://vercel.com).
+
+## Estructura del Proyecto
+
+- **`api/index.js`**: Endpoint principal que da la bienvenida a la API.
+- **`api/tasa.js`**: Endpoint que obtiene la tasa del dólar desde el sitio web del BCV.
+
+## Instalación
+
+1. Clona este repositorio:
+   ```bash
+   git clone https://github.com/Anthonyzok521/get-dollar-bcv.git
+   cd get-dollar-bcv
+
+Collecting workspace informationAquí tienes un ejemplo de un archivo `README.md` para tu proyecto:
+
+# Get Dollar BCV
+
+API para obtener el precio del dólar oficial del Banco Central de Venezuela (BCV).
+
+## Descripción
+
+Este proyecto utiliza `axios` y `cheerio` para realizar scraping de la página oficial del BCV y extraer la tasa de cambio oficial del dólar. Está diseñado para ser desplegado en [Vercel](https://vercel.com).
+
+## Estructura del Proyecto
+
+```
+.gitignore
+package.json
+vercel.json
+.vercel/
+  project.json
+  README.txt
+api/
+  index.js
+  tasa.js
+```
+
+- **`api/index.js`**: Endpoint principal que da la bienvenida a la API.
+- **`api/tasa.js`**: Endpoint que obtiene la tasa del dólar desde el sitio web del BCV.
+
+## Instalación
+
+1. Clona este repositorio:
+   ```bash
+   git clone https://github.com/Anthonyzok521/get-dollar-bcv.git
+   cd get-dollar-bcv
+   ```
+
+2. Instala las dependencias:
+   ```bash
+   npm install
+   ```
+
+## Uso en Desarrollo
+
+Para ejecutar el proyecto en modo desarrollo, utiliza el siguiente comando:
+
+```bash
+npm run dev
+```
+
+Esto iniciará el servidor con `nodemon` para recargar automáticamente los cambios.
+
+## Despliegue en Vercel
+
+Este proyecto está configurado para ser desplegado en Vercel. Sigue estos pasos:
+
+1. Instala la CLI de Vercel si no la tienes:
+   ```bash
+   npm install -g vercel
+   ```
+
+2. Despliega el proyecto:
+   ```bash
+   vercel
+   ```
+
+3. Una vez desplegado, los endpoints estarán disponibles en la URL proporcionada por Vercel.
+
+## Endpoints
+
+### `GET /api`
+
+Devuelve un mensaje de bienvenida.
+
+### `GET /api/tasa`
+
+Obtiene la tasa oficial del dólar desde el sitio web del BCV.
+
+#### Respuesta Exitosa
+
+```json
+{
+  "success": true,
+  "data": {
+    "tasa": 32.5,
+    "fecha": "2023-10-01T00:00:00.000Z",
+    "moneda": "USD",
+    "unidad": "VES",
+    "fuente": "BCV"
+  }
+}
+```
+
+#### Respuesta con Error
+
+```json
+{
+  "success": false,
+  "error": "Error al obtener tasa BCV: <mensaje de error>"
+}
+```
+
+## Dependencias
+
+- [axios](https://www.npmjs.com/package/axios): Para realizar solicitudes HTTP.
+- [cheerio](https://www.npmjs.com/package/cheerio): Para realizar scraping de HTML.
+- [express](https://www.npmjs.com/package/express): Framework para manejar rutas (aunque no se usa directamente en Vercel).
