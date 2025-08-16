@@ -94,11 +94,14 @@ async function obtenerTasaDolarBCV() {
       fuente: 'BCV'
     };
 
-    // Guardar en la base de datos
-    const dollarRate = new DollarRate(newRate);
-    await dollarRate.save();
+    // Guardar o actualizar en la base de datos
+    const updatedRate = await DollarRate.findOneAndUpdate(
+      { fuente: 'BCV' }, // Usamos la fuente como un identificador único
+      newRate,
+      { new: true, upsert: true } // new: true devuelve el documento actualizado, upsert: true crea el documento si no existe
+    );
 
-    return newRate;
+    return updatedRate;
     
   } catch (error) {
     throw new Error(`Error al obtener tasa BCV: ${error.message}`);
