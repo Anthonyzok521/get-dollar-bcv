@@ -3,9 +3,16 @@ const axios = require('axios');
 const cheerio = require('cheerio');
 const https = require('https');
 const momentTZ = require('moment-timezone');
+const connectDB = require('./db');
+const DollarRate = require('./dollarRate');
+
+require('dotenv').config();
 
 const app = express();
 const PORT = process.env.PORT || 3100;
+
+// Conectar a MongoDB
+connectDB();
 
 // Configuración para ignorar errores de certificado SSL (solo desarrollo)
 const agent = new https.Agent({  
@@ -33,6 +40,24 @@ app.use((req, res, next) => {
 
 // Función para obtener la tasa del BCV
 async function obtenerTasaDolarBCV() {
+  const today = momentTZ.tz('America/Caracas').day();
+
+  // Si es Sábado (6) o Domingo (0)
+  if (today === 6 || today === 0) {
+    const lastRate = await DollarRate.findOne().sort({ fecha: -1 });
+    if (lastRate) {
+      return {
+        tasa: lastRate.tasa,
+        fecha: lastRate.fecha,
+        moneda: 'USD',
+        unidad: 'VES',
+        fuente: 'BCV (Tasa de Viernes)'
+      };
+    } else {
+      throw new Error('No hay tasas registradas para mostrar durante el fin de semana.');
+    }
+  }
+
   const url = 'https://www.bcv.org.ve/';
   
   try {
@@ -61,13 +86,19 @@ async function obtenerTasaDolarBCV() {
       throw new Error(`Valor no numérico: ${tasaText}`);
     }
 
-    return {
+    const newRate = {
       tasa: tasa,
       fecha: dateFormateWithTZ(new Date()),
       moneda: 'USD',
       unidad: 'VES',
       fuente: 'BCV'
     };
+
+    // Guardar en la base de datos
+    const dollarRate = new DollarRate(newRate);
+    await dollarRate.save();
+
+    return newRate;
     
   } catch (error) {
     throw new Error(`Error al obtener tasa BCV: ${error.message}`);
