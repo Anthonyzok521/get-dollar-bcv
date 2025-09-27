@@ -43,7 +43,7 @@ async function obtenerTasaDolarBCV() {
   const today = momentTZ.tz('America/Caracas').day();
 
   // Si es Sábado (6) o Domingo (0)
-  if (today === 6 || today === 0) {
+  if (today === 5 || today === 6 || today === 0) {
     const lastRate = await DollarRate.findOne().sort({ fecha: -1 });
     if (lastRate) {
       return {
