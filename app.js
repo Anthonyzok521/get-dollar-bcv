@@ -123,13 +123,77 @@ async function obtenerTasaDolarBCV() {
   }
 }
 
+// Función para obtener la tasa de USDT/VES del mercado P2P de Binance
+async function obtenerTasaUSDTVES() {
+  const url = 'https://p2p.binance.com/bapi/c2c/v2/friendly/c2c/adv/search';
+
+  try {
+    const response = await axios.post(url, {
+      proMerchantAds: false,
+      page: 1,
+      rows: 5,
+      payTypes: [],
+      countries: [],
+      publisherType: null,
+      asset: 'USDT',
+      fiat: 'VES',
+      tradeType: 'SELL',
+      classifies: ['mass', 'profession']
+    }, {
+      headers: {
+        'Content-Type': 'application/json',
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36',
+        'Accept': 'application/json',
+        'Accept-Language': 'es-ES,es;q=0.9',
+        'Connection': 'keep-alive',
+        'Origin': 'https://p2p.binance.com',
+        'Referer': 'https://p2p.binance.com/'
+      },
+      timeout: 5000
+    });
+
+    const ads = response.data.data;
+
+    if (!ads || ads.length === 0) {
+      throw new Error('No se encontraron anuncios P2P');
+    }
+
+    // Para tradeType SELL, los anuncios vienen ordenados por mejor precio
+    // (el menor precio al que un vendedor ofrece USDT)
+    const mejorAnuncio = ads[0];
+    const tasa = parseFloat(mejorAnuncio.adv.price);
+
+    if (isNaN(tasa)) {
+      throw new Error(`Valor no numérico: ${mejorAnuncio.adv.price}`);
+    }
+
+    return {
+      tasa: tasa,
+      fecha: dateFormateWithTZ(new Date()),
+      fuente: 'BINANCE'
+    };
+
+  } catch (error) {
+    throw new Error(`Error al obtener tasa USDT/VES Binance: ${error.message}`);
+  }
+}
+
 // Endpoint principal
 app.get('/api/tasa', async (req, res) => {
   try {
     const data = await obtenerTasaDolarBCV();
+
+    let usdtVes = null;
+    try {
+      usdtVes = await obtenerTasaUSDTVES();
+    } catch (error) {
+      usdtVes = { error: error.message };
+    }
+
     res.json({
       success: true,
-      data: data
+      data: data,
+      'usdt-ves': usdtVes
     });
   } catch (error) {
     res.status(500).json({
