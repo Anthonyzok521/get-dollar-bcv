@@ -178,6 +178,63 @@ async function obtenerTasaUSDTVES() {
   }
 }
 
+async function obtenerTasaCuracao() {
+  const url = 'https://www.mcb-bank.com/personal/support-services/currency-exchange-rates';
+
+  try {
+    const response = await axios.get(url, {
+      httpsAgent: agent,
+      headers: {
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36',
+        'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8',
+        'Accept-Language': 'en-US,en;q=0.9',
+        'Accept-Encoding': 'gzip, deflate, br',
+        'Connection': 'keep-alive',
+        'Sec-Fetch-Dest': 'document',
+        'Sec-Fetch-Mode': 'navigate',
+        'Sec-Fetch-Site': 'none',
+        'Sec-Fetch-User': '?1',
+        'Upgrade-Insecure-Requests': '1'
+      },
+      timeout: 10000
+    });
+
+    const $ = cheerio.load(response.data);
+
+    let tasaText = null;
+    $('table tr').each((_, row) => {
+      const cells = $(row).find('td');
+      if (cells.length >= 7) {
+        const currencyCode = $(cells[2]).text().trim().toUpperCase();
+        if (currencyCode === 'USD') {
+          tasaText = $(cells[6]).text().trim(); // Selling rate
+          return false;
+        }
+      }
+    });
+
+    if (!tasaText) {
+      throw new Error('No se encontró la tasa USD/XCG en la tabla');
+    }
+
+    const tasa = parseFloat(tasaText.replace(',', '.'));
+
+    if (isNaN(tasa)) {
+      throw new Error(`Valor no numérico: ${tasaText}`);
+    }
+
+    return {
+      tasa: tasa,
+      fecha: dateFormateWithTZ(new Date()),
+      moneda: 'USD',
+      unidad: 'XCG',
+      fuente: 'MCB'
+    };
+  } catch (error) {
+    throw new Error(`Error al obtener tasa USD/XCG MCB: ${error.message}`);
+  }
+}
+
 // Endpoint principal
 app.get('/api/tasa', async (req, res) => {
   try {
@@ -194,6 +251,21 @@ app.get('/api/tasa', async (req, res) => {
       success: true,
       data: data,
       'usdt-ves': usdtVes
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      error: error.message
+    });
+  }
+});
+
+app.get('/api/curacao', async (req, res) => {
+  try {
+    const data = await obtenerTasaCuracao();
+    res.json({
+      success: true,
+      data: data,
     });
   } catch (error) {
     res.status(500).json({
