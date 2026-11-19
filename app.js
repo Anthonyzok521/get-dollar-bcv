@@ -260,6 +260,7 @@ app.get('/api/tasa', async (req, res) => {
   }
 });
 
+// Endpoint para obtener la tasa de cambion en florin a USD
 app.get('/api/curacao', async (req, res) => {
   try {
     const data = await obtenerTasaCuracao();
