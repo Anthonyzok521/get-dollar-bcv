@@ -178,7 +178,7 @@ async function obtenerTasaUSDTVES() {
   }
 }
 
-async function obtenerTasaCuracao() {
+async function obtenerTasaCuracao(_tasa) {
   const url = 'https://www.mcb-bank.com/personal/support-services/currency-exchange-rates';
 
   try {
@@ -201,13 +201,15 @@ async function obtenerTasaCuracao() {
 
     const $ = cheerio.load(response.data);
 
+    let cell = _tasa == "1" ? 4 : _tasa == "2" ? 5 : 6;
+
     let tasaText = null;
     $('table tr').each((_, row) => {
       const cells = $(row).find('td');
       if (cells.length >= 7) {
         const currencyCode = $(cells[2]).text().trim().toUpperCase();
         if (currencyCode === 'USD') {
-          tasaText = $(cells[6]).text().trim(); // Selling rate
+          tasaText = $(cells[cell]).text().trim(); // Buying rate banknotes | Buying rate | Selling rate
           return false;
         }
       }
@@ -235,10 +237,9 @@ async function obtenerTasaCuracao() {
   }
 }
 
-// Endpoint para obtener la tasa de cambion en florin a USD
-app.get('/api/curacao', async (req, res) => {
+const controllerCuracao = async (req, res) => {
   try {
-    const data = await obtenerTasaCuracao();
+    const data = await obtenerTasaCuracao(req.params.tasa);
     res.json({
       success: true,
       data: data,
@@ -249,7 +250,11 @@ app.get('/api/curacao', async (req, res) => {
       error: error.message
     });
   }
-});
+}
+
+// Endpoint para obtener la tasa de cambion en florin a USD
+app.get('/api/curacao/:tasa', controllerCuracao);
+app.get('/api/curacao/', controllerCuracao);
 
 // Endpoint principal
 app.get('/api/tasa', async (req, res) => {
