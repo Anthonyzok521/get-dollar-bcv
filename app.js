@@ -235,6 +235,22 @@ async function obtenerTasaCuracao() {
   }
 }
 
+// Endpoint para obtener la tasa de cambion en florin a USD
+app.get('/api/curacao', async (req, res) => {
+  try {
+    const data = await obtenerTasaCuracao();
+    res.json({
+      success: true,
+      data: data,
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      error: error.message
+    });
+  }
+});
+
 // Endpoint principal
 app.get('/api/tasa', async (req, res) => {
   try {
@@ -260,21 +276,6 @@ app.get('/api/tasa', async (req, res) => {
   }
 });
 
-// Endpoint para obtener la tasa de cambion en florin a USD
-app.get('/api/curacao', async (req, res) => {
-  try {
-    const data = await obtenerTasaCuracao();
-    res.json({
-      success: true,
-      data: data,
-    });
-  } catch (error) {
-    res.status(500).json({
-      success: false,
-      error: error.message
-    });
-  }
-});
 
 // Endpoint de prueba
 app.get('/', (req, res) => {
